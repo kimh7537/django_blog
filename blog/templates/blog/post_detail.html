@@ -1,185 +1,158 @@
-<!DOCTYPE html>
-{% load static %}
-<html lang="ko">
+{% extends 'blog/base.html' %}
+{% load crispy_forms_tags %}
 
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="" />
-        <meta name="author" content="" />
-        <title>{{ post.title }} - Blog</title>
+{% block head_title %}
+    {{ post.title }} - Blog
+{% endblock %}
 
-        <!-- Bootstrap core CSS-->
-        <link rel="stylesheet" href="{% static 'blog/css/blog-post.css' %}" media="screen">
 
-        <!-- Custom style for this template -->
-        <link rel="stylesheet" href="{% static 'blog/css/blog-post.css' %}" media="screen">
-        <script src="https://kit.fontawesome.com/ccadad1fc6.js" crossorigin="anonymous"></script>
-    </head>
-    <body>
-        <!-- Responsive navbar-->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a class="navbar-brand" href="#!">Start Bootstrap</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                        <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#!">About</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#!">Contact</a></li>
-                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="#">Blog</a></li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-        <!-- Page content-->
-        <div class="container mt-5">
-            <div class="row">
-                <div class="col-lg-8">
-                    <!-- Post content-->
-                    <article>
-                        <!-- Post header-->
-                        <header class="mb-4">
-                            <!-- Post title-->
-                            <h1 class="mt-4">{{ post.title }}</h1>
-                            <h5 class="text-muted">{{ post.hook_test }}</h5>
+{% block main_area %}
+    <div id="post-area">
+        {% if post.category %}
+            <span class="badge badge-secondary float-right">{{ post.category }}</span>
+        {% else %}
+            <span class="badge badge-secondary float-right">미분류</span>
+        {% endif %}
 
-                            <p class="lead">
-                                by
-                                <a href="#"> 작성자명 쓸 위치(개발예정)</a>
-                            </p>
-                            <hr>
-                            <p>{{ post.created_at }}</p>
-                            <hr>
-                            {% if post.head_image %}
-                                <img class="img-fluid rounded" src="{{ post.head_image.url }}" alt="{{ post.title }} head_image">
-                            {% else %}
-                                <img class="img-fluid rounded" src="https://picsum.photos/seed/{{ post.id }}/800/200" alt="random_image">
-                            {% endif %}
-                            <hr>
-                            <p>{{ post.content }}</p>
+        <!-- Title -->
+        <h1 class="mt-4">{{ post.title }}</h1>
+        <h5 class="text-muted">{{ post.hook_text }}</h5>
+        <!-- Author -->
+        <p class="lead">
+            by
+            <a href="#">{{ post.author | upper }}</a>
+        </p>
 
-                            {% if post.file_upload %}
-                                <a href="{{ post.file_upload.url }}" class="btn btn-outline-dark" role="button">
-                                    Download:
+        <hr>
 
-                                    {% if post.get_file_ext == 'csv' %}
-                                        <i class="fas fa-file-csv"></i>
-                                    {% elif post.get_file_ext == 'xlsx' or post.get_file_ext == 'xls' %}
-                                        <i class="fas fa-file-excel"></i>
-                                    {% elif post.get_file_ext == 'docx' or post.get_file_ext == 'doc' %}
-                                        <i class="fas fa-file-word"></i>
-                                    {% else %}
-                                        <i class="far fa-file"></i>
-                                    {% endif %}
-                                    {{ post.get_file_name }}
-                                </a>
-                            {% endif %}
-                            <hr>
+        {% if user.is_authenticated and user == post.author %}
+            <a class="btn btn-info btn-sm float-right" href="/blog/update_post/{{ post.pk }}/" role="button"><i class="fas fa-pen"></i>  Edit Post</a>
+        {% endif %}
 
-<!--                            &lt;!&ndash; Post meta content&ndash;&gt;-->
-<!--                            <div class="text-muted fst-italic mb-2">Posted on January 1, 2023 by Start Bootstrap</div>-->
-<!--                            &lt;!&ndash; Post categories&ndash;&gt;-->
-<!--                            <a class="badge bg-secondary text-decoration-none link-light" href="#!">Web Design</a>-->
-<!--                            <a class="badge bg-secondary text-decoration-none link-light" href="#!">Freebies</a>-->
-                        </header>
-<!--                        &lt;!&ndash; Preview image figure&ndash;&gt;-->
-<!--                        <figure class="mb-4"><img class="img-fluid rounded" src="https://dummyimage.com/900x400/ced4da/6c757d.jpg" alt="..." /></figure>-->
+        <!-- Date/Time -->
+        <p>Posted on {{ post.created_at }}</p>
 
-                    </article>
-                    <!-- Comments section-->
-                    <section class="mb-5">
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <!-- Comment form-->
-                                <form class="mb-4"><textarea class="form-control" rows="3" placeholder="Join the discussion and leave a comment!"></textarea></form>
-                                <!-- Comment with nested comments-->
-                                <div class="d-flex mb-4">
-                                    <!-- Parent comment-->
-                                    <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
-                                    <div class="ms-3">
-                                        <div class="fw-bold">Commenter Name</div>
-                                        If you're going to lead a space frontier, it has to be government; it'll never be private enterprise. Because the space frontier is dangerous, and it's expensive, and it has unquantified risks.
-                                        <!-- Child comment 1-->
-                                        <div class="d-flex mt-4">
-                                            <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
-                                            <div class="ms-3">
-                                                <div class="fw-bold">Commenter Name</div>
-                                                And under those conditions, you cannot establish a capital-market evaluation of that enterprise. You can't get investors.
-                                            </div>
-                                        </div>
-                                        <!-- Child comment 2-->
-                                        <div class="d-flex mt-4">
-                                            <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
-                                            <div class="ms-3">
-                                                <div class="fw-bold">Commenter Name</div>
-                                                When you put money directly to a problem, it makes a good headline.
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- Single comment-->
-                                <div class="d-flex">
-                                    <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
-                                    <div class="ms-3">
-                                        <div class="fw-bold">Commenter Name</div>
-                                        When I look at the universe and all the ways the universe wants to kill us, I find it hard to reconcile that with statements of beneficence.
-                                    </div>
-                                </div>
-                            </div>
+        <hr>
+
+        <!-- Preview Image -->
+        {% if post.head_image %}
+            <img class="img-fluid rounded" src="{{ post.head_image.url }}" alt="{{ post.title }} head_image">
+        {% else %}
+            <img class="img-fluid rounded" src="https://picsum.photos/seed/{{ post.id }}/800/200" alt="random_image">
+        {% endif %}
+
+
+        <hr>
+
+        <!-- Post Content -->
+        <p>{{ post.get_content_markdown | safe }}</p>
+
+        {% if post.tags.exists %}
+            <i class="fas fa-tags"></i>
+            {% for tag in post.tags.all %}
+                <a href="{{ tag.get_absolute_url }}" class="badge badge-light">{{ tag }}</a>
+            {% endfor %}
+            <br/>
+            <br/>
+        {% endif %}
+
+
+        {% if post.file_upload %}
+            <a href="{{ post.file_upload.url }}" class="btn btn-outline-dark" role="button" download>
+                Download:
+
+                {% if post.get_file_ext == 'csv' %}
+                    <i class="fas fa-file-csv"></i>
+                {% elif post.get_file_ext == 'xlsx' or post.get_file_ext == 'xls' %}
+                    <i class="fas fa-file-excel"></i>
+                {% elif post.get_file_ext == 'docx' or post.get_file_ext == 'doc' %}
+                    <i class="fas fa-file-word"></i>
+                {% else %}
+                    <i class="far fa-file"></i>
+                {% endif %}
+
+                {{ post.get_file_name }}
+            </a>
+        {% endif %}
+
+        <hr>
+    </div>
+
+    <div id="comment-area">
+        <!-- Comments Form -->
+        <div class="card my-4">
+            <h5 class="card-header">Leave a Comment:</h5>
+            <div class="card-body">
+                {% if user.is_authenticated %}
+                    <form id="comment-form" method="POST" action="{{ post.get_absolute_url }}new_comment/">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            {{ comment_form | crispy }}
                         </div>
-                    </section>
-                </div>
-                <!-- Side widgets-->
-                <div class="col-lg-4">
-                    <!-- Search widget-->
-                    <div class="card mb-4">
-                        <div class="card-header">Search</div>
-                        <div class="card-body">
-                            <div class="input-group">
-                                <input class="form-control" type="text" placeholder="Enter search term..." aria-label="Enter search term..." aria-describedby="button-search" />
-                                <button class="btn btn-primary" id="button-search" type="button">Go!</button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Categories widget-->
-                    <div class="card mb-4">
-                        <div class="card-header">Categories</div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <ul class="list-unstyled mb-0">
-                                        <li><a href="#!">Web Design</a></li>
-                                        <li><a href="#!">HTML</a></li>
-                                        <li><a href="#!">Freebies</a></li>
-                                    </ul>
-                                </div>
-                                <div class="col-sm-6">
-                                    <ul class="list-unstyled mb-0">
-                                        <li><a href="#!">JavaScript</a></li>
-                                        <li><a href="#!">CSS</a></li>
-                                        <li><a href="#!">Tutorials</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Side widget-->
-                    <div class="card mb-4">
-                        <div class="card-header">Side Widget</div>
-                        <div class="card-body">You can put anything you want inside of these side widgets. They are easy to use, and feature the Bootstrap 5 card component!</div>
-                    </div>
-                </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                {% else %}
+                    <a role="button" class="btn btn-outline-dark btn-block btn-sm" href="#" data-toggle="modal" data-target="#loginModal">Log in and leave a comment</a>
+                {% endif %}
             </div>
         </div>
-        <!-- Footer-->
-        <footer class="py-5 bg-dark">
-            <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Your Website 2023</p></div>
-        </footer>
-        <!-- Bootstrap core JS-->
-        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s" crossorigin="anonymous"></script>
 
-    </body>
-</html>
+        {% if post.comment_set.exists %}
+            {% for comment in post.comment_set.iterator %}
+                <!-- Single Comment -->
+                <div class="media mb-4" id="comment-{{ comment.pk }}">
+                    <img class="d-flex mr-3 rounded-circle" src="{{ comment.get_avatar_url }}" alt="{{ comment.author }}" width="60px">
+                    <div class="media-body">
+                        {% if user.is_authenticated and comment.author == user %}
+                            <div class="float-right">
+                                <a role="button"
+                                   class="btn btn-sm btn-info"
+                                   id="comment-{{ comment.pk }}-update-btn"
+                                   href="/blog/update_comment/{{ comment.pk }}/">
+                                    edit
+                                </a>
+                                <a role="button"
+                                   href="#"
+                                   id="comment-{{ comment.pk }}-delete-modal-btn"
+                                   class="btn btn-sm btn-danger"
+                                   data-toggle="modal" data-target="#deleteCommentModal-{{ comment.pk }}">
+                                    delete
+                                </a>
+                            </div>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="deleteCommentModal-{{ comment.pk }}" tabindex="-1" role="dialog" aria-labelledby="deleteCommentModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel">Are You Sure?</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <del>{{ comment | linebreaks }}</del>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                            <a role="button" class="btn btn-danger" href="/blog/delete_comment/{{ comment.pk }}/">Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        {% endif %}
+                        <h5 class="mt-0">
+                            {{ comment.author.username }}
+                            &nbsp;&nbsp;<small class="text-muted">{{ comment.created_at }}</small>
+                        </h5>
+                        <p>{{ comment.content | linebreaks }}</p>
+                        {% if comment.created_at != comment.modified_at %}
+                            <p class="text-muted float-right"><small>Updated: {{ comment.modified_at }}</small></p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endblock %}
