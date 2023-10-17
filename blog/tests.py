@@ -259,6 +259,8 @@ class TestView(TestCase):
         main_area = soup.find('div', id='main-area')
         self.assertIn('Create New Post', main_area.text)
 
+        tag_str_input = main_area.find('input', id='id_tags_str')
+        self.assertTrue(tag_str_input)
 
         # 경로로 두 번째 인수를 POST방식으로 보냄
         self.client.post(
@@ -266,6 +268,7 @@ class TestView(TestCase):
             {
                 'title': 'Post Form 만들기',
                 'content': "Post Form 페이지를 만듭시다.",
+                'tags_str': 'new tag; 한글 태그, python',
             }
         )
 
@@ -273,6 +276,11 @@ class TestView(TestCase):
         last_post = Post.objects.last()
         self.assertEqual(last_post.title, "Post Form 만들기")
         self.assertEqual(last_post.author.username, 'obama')
+
+        self.assertEqual(last_post.tags.count(), 3)
+        self.assertTrue(Tag.objects.get(name='new tag'))
+        self.assertTrue(Tag.objects.get(name='한글 태그'))
+        self.assertEqual(Tag.objects.count(), 5)
 
 
     def test_update_post(self):
