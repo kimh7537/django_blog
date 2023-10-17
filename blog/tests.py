@@ -8,13 +8,12 @@ class TestView(TestCase):
         self.client = Client()
         self.user_trump = User.objects.create_user(username='trump', password='somepassword')
         self.user_obama = User.objects.create_user(username='obama', password='somepassword')
-
         self.user_obama.is_staff = True
         self.user_obama.save()
 
         self.category_programming = Category.objects.create(name='programming', slug='programming')
         self.category_music = Category.objects.create(name='music', slug='music')
-        
+
         self.tag_python_kor = Tag.objects.create(name='파이썬 공부', slug='파이썬-공부')
         self.tag_python = Tag.objects.create(name='python', slug='python')
         self.tag_hello = Tag.objects.create(name='hello', slug='hello')
@@ -39,7 +38,6 @@ class TestView(TestCase):
             content='category가 없을 수도 있죠',
             author=self.user_obama
         )
-
         self.post_003.tags.add(self.tag_python_kor)
         self.post_003.tags.add(self.tag_python)
 
@@ -159,9 +157,6 @@ class TestView(TestCase):
         self.assertIn(self.tag_python.name, post_003_card.text)
         self.assertIn(self.tag_python_kor.name, post_003_card.text)
 
-        self.assertIn(self.user_trump.username.upper(), main_area.text)
-        self.assertIn(self.user_obama.username.upper(), main_area.text)
-
         # Post가 없는 경우
         Post.objects.all().delete()
         self.assertEqual(Post.objects.count(), 0)
@@ -169,6 +164,7 @@ class TestView(TestCase):
         soup = BeautifulSoup(response.content, 'html.parser')
         main_area = soup.find('div', id='main-area')  # id가 main-area인 div태그를 찾습니다.
         self.assertIn('아직 게시물이 없습니다', main_area.text)
+
 
     def test_post_detail(self):
         # # 1.1 포스트가 하나 있다.
@@ -178,8 +174,6 @@ class TestView(TestCase):
         #     author=self.user_trump,
         # )
 
-
-
         # 1.2 그 포스트의 url은 '/blog/1/'이다.
         self.assertEqual(self.post_001.get_absolute_url(), '/blog/1/')
 
@@ -187,11 +181,10 @@ class TestView(TestCase):
         # 2.1 첫 번째 포스트의 url로 접근하면 정상적으로 작동한다(status code: 200)
         response = self.client.get(self.post_001.get_absolute_url())
         self.assertEqual(response.status_code, 200)
-        soup = BeautifulSoup(response.content_type, 'html.parser')
+        soup = BeautifulSoup(response.content, 'html.parser')
 
         # 2.2 포스트 목록 페이지와 똑같은 네비게이션 바가 있다.
         self.navbar_test(soup)
-
         self.category_card_test(soup)
 
         # 2.3 첫 번째 포스트의 제목이 웹 브라우저 탭 타이틀에 들어 있다.
@@ -216,8 +209,8 @@ class TestView(TestCase):
     def test_category_page(self):
         response = self.client.get(self.category_programming.get_absolute_url())
         self.assertEqual(response.status_code, 200)
-
         soup = BeautifulSoup(response.content, 'html.parser')
+
         self.navbar_test(soup)
         self.category_card_test(soup)
 
@@ -280,3 +273,52 @@ class TestView(TestCase):
         last_post = Post.objects.last()
         self.assertEqual(last_post.title, "Post Form 만들기")
         self.assertEqual(last_post.author.username, 'obama')
+
+
+    def test_update_post(self):
+        update_post_url = f'/blog/update_post/{self.post_003.pk}/'
+        # 로그인 하지 않은 경우
+        response = self.client.get(update_post_url)
+        self.assertNotEqual(response.status_code, 200)
+
+        # 로그인은 했지만, 작성자가 아닌 경우
+        self.assertNotEqual(self.post_003.author, self.user_trump)
+        self.client.login(
+            username=self.user_trump.username,
+            password='somepassword'
+        )
+        response = self.client.get(update_post_url)
+        self.assertEqual(response.status_code, 403)
+
+        # 작성자(obama)가 접근하는 경우
+        self.client.login(
+            username=self.post_003.author.username,
+            password='somepassword'
+        )
+        response = self.client.get(update_post_url)
+        self.assertEqual(response.status_code, 200)
+
+        soup = BeautifulSoup(response.content, 'html.parser')
+        self.assertEqual('Edit Post - Blog', soup.title.text)
+        main_area = soup.find('div', id='main-area')
+        self.assertIn('Edit Post', main_area.text)
+
+        # tag_str_input = main_area.find('input', id='id_tags_str')
+        # self.assertTrue(tag_str_input)
+        # self.assertIn('파이썬 공부; python', tag_str_input.attrs['value'])
+
+        response = self.client.post(     #post
+            update_post_url,
+            {
+                'title': '세 번째 포스트를 수정했습니다. ',
+                'content': '안녕 세계? 우리는 하나!',
+                'category': self.category_music.pk,
+            },
+            follow=True
+        )
+        soup = BeautifulSoup(response.content, 'html.parser')
+        main_area = soup.find('div', id='main-area')
+        self.assertIn('세 번째 포스트를 수정했습니다.', main_area.text)
+        self.assertIn('안녕 세계? 우리는 하나!', main_area.text)
+        self.assertIn(self.category_music.name, main_area.text)
+

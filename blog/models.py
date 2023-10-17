@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from markdownx.models import MarkdownxField
 import os
 
 class Tag(models.Model):
@@ -10,7 +11,7 @@ class Tag(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return f'/blog/tag/{self.slug}'
+        return f'/blog/tag/{self.slug}/'
 
 
 class Category(models.Model):
@@ -21,7 +22,7 @@ class Category(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return f'/blog/category/{self.slug}'
+        return f'/blog/category/{self.slug}/'
 
     class Meta:
         verbose_name_plural = 'Categories'
@@ -31,7 +32,7 @@ class Category(models.Model):
 class Post(models.Model):
     title = models.CharField(max_length=30)
     hook_text = models.CharField(max_length=100, blank=True)
-    content = models.TextField()
+    content = MarkdownxField()
 
     head_image = models.ImageField(upload_to='blog/images/%Y/%m/%d/', blank=True)
     file_upload = models.FileField(upload_to='blog/files/%Y/%m/%d/', blank=True)

@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Post, Category, Tag
+from django.core.exceptions import PermissionDenied
 
 class PostList(ListView):
     model = Post
@@ -65,6 +66,49 @@ class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             return redirect('/blog/')
 
 
+class PostUpdate(LoginRequiredMixin, UpdateView):
+    model = Post
+    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category', 'tags']
+
+    template_name = 'blog/post_update_form.html'
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(PostUpdate, self).get_context_data()
+    #     if self.object.tags.exists():
+    #         tags_str_list = list()
+    #         for t in self.object.tags.all():
+    #             tags_str_list.append(t.name)
+    #         context['tags_str_default'] = '; '.join(tags_str_list)
+    #
+    #     return context
+
+    def dispatch(self, request, *args, **kwargs):    #방문자가 GET, POST 중 어떤 방식으로 요청했는지를 알려줌(GET은 폼 페이지 보여줌, POST는 폼이 유효한지 확인하고 저장)
+        if request.user.is_authenticated and request.user == self.get_object().author:
+            return super(PostUpdate, self).dispatch(request, *args, **kwargs)
+        else:
+            raise PermissionDenied
+
+    # def form_valid(self, form):
+    #     response = super(PostUpdate, self).form_valid(form)
+    #     self.object.tags.clear()
+    #
+    #     tags_str = self.request.POST.get('tags_str')
+    #     if tags_str:
+    #         tags_str = tags_str.strip()
+    #         tags_str = tags_str.replace(',', ';')
+    #         tags_list = tags_str.split(';')
+    #
+    #         for t in tags_list:
+    #             t = t.strip()
+    #             tag, is_tag_created = Tag.objects.get_or_create(name=t)
+    #             if is_tag_created:
+    #                 tag.slug = slugify(t, allow_unicode=True)
+    #                 tag.save()
+    #             self.object.tags.add(tag)
+    #
+    #     return response
+
+
 def category_page(request, slug):
     if slug == 'no_category':
         category = '미분류'
@@ -85,7 +129,6 @@ def category_page(request, slug):
     )
 
 def tag_page(request, slug):
-
     tag = Tag.objects.get(slug=slug)
     post_list = tag.post_set.all()
 
