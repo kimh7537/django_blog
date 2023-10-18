@@ -58,14 +58,14 @@ class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def test_func(self):
         return self.request.user.is_superuser or self.request.user.is_staff
 
-    def form_valid(self, form):
-        current_user = self.request.user
+    def form_valid(self, form):           # 폼 안에 들어온 값으로 모델에 해당하는 인스턴스를 만들어 데이터베이스에 저장, 그 경로로 리다이렉트
+        current_user = self.request.user  # 오버라이딩 한 이유: 데이터베이스 저장 전 author를 추가하기 위해
         if current_user.is_authenticated and (current_user.is_staff or current_user.is_superuser):
             form.instance.author = current_user
 
-            response = super(PostCreate, self).form_valid(form)
+            response = super(PostCreate, self).form_valid(form)  # 태그는 포스트가 이미 데이터베이스에 있는 상태여야 부여 가능/여기서 결과를 임시 저장
 
-            tags_str = self.request.POST.get('tags_str')   #post_form에서 값 받아옴
+            tags_str = self.request.POST.get('tags_str')   #post_form.html에서 값 받아옴
             if tags_str:
                 tags_str = tags_str.strip()
 
@@ -78,8 +78,8 @@ class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                     if is_tag_created:
                         tag.slug = slugify(t, allow_unicode=True)
                         tag.save()
-                    self.object.tags.add(tag)    #self.object는 새로 만든 포스트를 의미, 새로 만든 포스트의 tags에 추가해줌
-
+                    self.object.tags.add(tag)    # self.object는 새로 만든 포스트를 의미, 새로 만든 포스트의 tags에 추가해줌
+                                                 # 새로 저장된 포스트를 self.object라고 가져와서 태그를 추가함
             return response
         else:
             return redirect('/blog/')
@@ -87,11 +87,11 @@ class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 class PostUpdate(LoginRequiredMixin, UpdateView):
     model = Post
-    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category', 'tags']
+    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category']
 
     template_name = 'blog/post_update_form.html'
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs):    # Edit Post 할때 기존에 있던 tag값들을 넘겨줘서 화면에 보여줌/CBV에서 템플릿에 추가 인자 넣어줌
         context = super(PostUpdate, self).get_context_data()
         if self.object.tags.exists():
             tags_str_list = list()
@@ -109,7 +109,7 @@ class PostUpdate(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         response = super(PostUpdate, self).form_valid(form)
-        self.object.tags.clear()
+        self.object.tags.clear()    # 기존 Post에 있는 tag를 모두 삭제 한 후, update 진행
 
         tags_str = self.request.POST.get('tags_str')
         if tags_str:
