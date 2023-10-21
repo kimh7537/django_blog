@@ -157,18 +157,12 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 
-SITE_ID = 1
-
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'none'
-LOGIN_REDIRECT_URL = '/blog/'
-
 # SOCIALACCOUNT_PROVIDERS = {
 #     "google": {
 #         "APP": {
 #             "client_id": os.getenv("GOOGLE_CLIENT_ID"),
 #             "secret": os.getenv("GOOGLE_SECRET_KEY"),
-#             "key": "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"
+#             "key": ""
 #         },
 #         # These are provider-specific settings that can only be
 #         # listed here:
@@ -181,3 +175,9 @@ LOGIN_REDIRECT_URL = '/blog/'
 #         }
 #     }
 # }
+
+SITE_ID = 1
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+LOGIN_REDIRECT_URL = '/blog/'
