@@ -142,9 +142,8 @@
                             </div>
 
                         {% endif %}
-                        <h5 class="mt-0">
-                            {{ comment.author.username }}
-                            &nbsp;&nbsp;<small class="text-muted">{{ comment.created_at }}</small>
+                        <h5 class="mt-0">{{ comment.author.username }}
+                            &nbsp;&nbsp;&nbsp;<small class="text-muted">{{ comment.created_at }}</small>
                         </h5>
                         <p>{{ comment.content | linebreaks }}</p>
                         {% if comment.created_at != comment.modified_at %}

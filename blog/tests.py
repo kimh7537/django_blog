@@ -395,6 +395,8 @@ class TestView(TestCase):
         self.assertIn('obama', new_comment_div.text)
         self.assertIn('오바마의 댓글입니다.', new_comment_div.text)
 
+
+
     def test_comment_update(self):
         comment_by_trump = Comment.objects.create(
             post=self.post_001,
@@ -421,6 +423,8 @@ class TestView(TestCase):
         comment_001_update_btn = comment_area.find('a', id='comment-1-update-btn')
         self.assertIn('edit', comment_001_update_btn.text)
         self.assertEqual(comment_001_update_btn.attrs['href'], '/blog/update_comment/1/')
+
+
 
         response = self.client.get('/blog/update_comment/1/')
         self.assertEqual(response.status_code, 200)
