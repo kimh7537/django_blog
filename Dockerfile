@@ -1,5 +1,5 @@
 # pull official base image
-FROM python:3.9-slim-buster
+FROM python:3.9.10-alpine
 
 # set work directory
 WORKDIR /usr/src/app
@@ -8,8 +8,8 @@ WORKDIR /usr/src/app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-#RUN apk update
-#RUN apk add postgresql-dev gcc python3-dev musl-dev zlib-dev jpeg-dev
+RUN apk update
+RUN apk add postgresql-dev gcc python3-dev musl-dev zlib-dev jpeg-dev
 
 COPY . /usr/src/app/
 # install dependencies
